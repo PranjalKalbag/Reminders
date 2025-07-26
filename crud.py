@@ -22,3 +22,13 @@ async def create_reminder(conn: AsyncConnection, reminder: schemas.ReminderInput
     )
     return schemas.ReminderOut(id=new_id, created_at=created_at, **reminder.dict())
 
+async def get_all_reminders(conn: AsyncConnection):
+    result = await conn.execute(select(reminders))
+    result = result.mappings().all()
+    return [dict(row) for row in result]
+
+
+async def get_reminder(conn: AsyncConnection, reminder_id: UUID):
+    result = await conn.execute(select(reminders).where(reminders.c.id==reminder_id))
+    result = result.fetchone()
+    return dict(result._mapping) if result else None
