@@ -1,9 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from sqlalchemy import text
-from database import engine
 from uuid import UUID
+from datetime import date
+from typing import Optional
 
 import crud
+from database import engine
 from schemas import *
 
 app = FastAPI()
@@ -19,6 +21,19 @@ async def list_reminders():
     async with engine.connect() as conn:
         return await crud.get_all_reminders(conn)
     
+@app.get('/reminders/search',response_model=list[ReminderOut])
+async def search_by_date(date_: Optional[date] = Query(None, alias="date"),
+    start_date: Optional[date] = Query(None),
+    end_date: Optional[date] = Query(None),):
+    if not date_ and not (start_date and end_date):
+        raise HTTPException(status_code=400, detail="You must provide either 'date' or both 'start_date' and 'end_date'")
+
+    async with engine.connect() as conn:
+        if date_:
+            return await crud.get_reminders_by_date(conn, date_)
+        else:
+            return await crud.get_reminders_by_range(conn, start_date, end_date)
+
 @app.get("/reminders/{reminder_id}", response_model=ReminderOut)
 async def get_reminder(reminder_id: UUID):
     async with engine.connect() as conn:
@@ -26,3 +41,5 @@ async def get_reminder(reminder_id: UUID):
         if not reminder:
             raise HTTPException(status_code=404, detail="Reminder not found")
         return reminder
+    
+
