@@ -7,14 +7,19 @@ from typing import Optional
 import crud
 from database import engine
 from schemas import *
-
+from ai import llm
 app = FastAPI()
 
 
 @app.post("/input", response_model=ReminderInput)
 async def new_reminder(reminder: ReminderInput):
-    async with engine.begin() as conn:
-        return await crud.create_reminder(conn, reminder)
+    
+    desc = reminder.description
+    rrule = llm.create_rrule(desc)
+    if rrule.upper()!='NA':
+        reminder.rrule = rrule
+        async with engine.begin() as conn:
+            return await crud.create_reminder(conn, reminder)
     
 @app.get("/reminders", response_model=list[ReminderOut])
 async def list_reminders():

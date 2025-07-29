@@ -8,9 +8,9 @@ from typing import Optional
 class ReminderInput(BaseModel):
     title: str
     description: str
-    rrule: str
+    rrule: Optional[str] = None
     start_date: date
-    end_date: Optional[date]
+    end_date: Optional[date] = None
 
 
 class ReminderUpdate(BaseModel):
