@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime as dt
 from datetime import date
+from telegram import Bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,ConversationHandler, CallbackContext
 
 from dotenv import load_dotenv
@@ -10,6 +11,9 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_ID = int(os.getenv("TELEGRAM_ID"))
+
+bot = Bot(token=BOT_TOKEN)
+
 
 def is_authorized(update):
     return update.effective_user.id == TELEGRAM_ID
@@ -20,6 +24,9 @@ def start(update, context):
         update.message.reply_text("❌ Access denied.")
         return
     update.message.reply_text("👋 Welcome back!")
+
+def send_telegram_message(message: str):
+    bot.send_message(chat_id=TELEGRAM_ID, text=message, parse_mode="Markdown")
 
 def today(update, context):
     if not is_authorized(update):

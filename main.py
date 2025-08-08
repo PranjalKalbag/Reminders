@@ -8,8 +8,14 @@ import crud
 from database import engine
 from schemas import *
 from ai import llm
+from scheduler import start_scheduler, send_due_reminders
+
+
 app = FastAPI()
 
+@app.on_event("startup")
+async def startup_event():
+    start_scheduler()
 
 @app.post("/input", response_model=ReminderInput)
 async def new_reminder(reminder: ReminderInput):
