@@ -18,6 +18,18 @@ bot = Bot(token=BOT_TOKEN)
 def is_authorized(update):
     return update.effective_user.id == TELEGRAM_ID
 
+def help(update, context):
+
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
+    update.message.reply_text(
+        "Available commands:\n"
+        "/start - Start the bot\n"
+        "/today - View today's reminders\n"
+        "/add - Add a new reminder\n"
+        "/cancel - Cancel the current operation\n"
+    )
 
 def start(update, context):
     if not is_authorized(update):
@@ -54,31 +66,42 @@ def today(update, context):
         update.message.reply_text("❌ Error fetching reminders.")
         print(f'Error msg: {e}')
     
-
 def start_add(update, context: CallbackContext):
     if not is_authorized(update):
         update.message.reply_text("❌ Access denied.")
-        return ConversationHandler.END
+        return 
 
     update.message.reply_text("📝 What is the *title* of your reminder?", parse_mode="Markdown")
     return TITLE
 
 def get_title(update, context: CallbackContext):
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
     context.user_data["title"] = update.message.text
     update.message.reply_text("✏️ Add a *description* for your reminder:", parse_mode="Markdown")
     return DESCRIPTION
 
 def get_description(update, context: CallbackContext):
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
     context.user_data["description"] = update.message.text
     update.message.reply_text("📅 Enter the *start date* (YYYY-MM-DD):", parse_mode="Markdown")
     return START_DATE
 
 def get_start_date(update, context: CallbackContext):
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
     context.user_data["start_date"] = update.message.text
     update.message.reply_text("📆 Enter the *end date* (YYYY-MM-DD):", parse_mode="Markdown")
     return END_DATE
 
 def get_end_date(update, context: CallbackContext):
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
     context.user_data["end_date"] = update.message.text
     text = update.message.text.strip().lower()
     if text in ("", "skip", "none"):
@@ -107,6 +130,9 @@ def get_end_date(update, context: CallbackContext):
     return ConversationHandler.END
 
 def cancel(update, context: CallbackContext):
+    if not is_authorized(update):
+        update.message.reply_text("❌ Access denied.")
+        return
     update.message.reply_text("🚫 Reminder creation cancelled.")
     return ConversationHandler.END
 
@@ -118,6 +144,7 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("today", today))
+    dp.add_handler(CommandHandler("help", help))
     conv_handler = ConversationHandler(
     entry_points=[CommandHandler('add', start_add)],
     states={
