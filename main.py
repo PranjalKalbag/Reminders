@@ -17,6 +17,12 @@ app = FastAPI()
 async def startup_event():
     start_scheduler()
 
+@app.get("/")
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.post("/input", response_model=ReminderInput)
 async def new_reminder(reminder: ReminderInput):
     
